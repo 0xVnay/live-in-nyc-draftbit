@@ -72,9 +72,12 @@ function InfoRow({
 
 export default function LocationDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  // The list is fully populated, so `base` (from the list cache) already has
+  // every field and renders instantly. `detail` is only a fallback for a cold
+  // deep-link straight to this screen.
   const { data: base } = useLocationFromList(id);
   const { data: detail } = useLocationDetail(id);
-  const place = detail ?? base;
+  const place = base ?? detail;
 
   const { isDark } = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -187,14 +190,14 @@ export default function LocationDetailScreen() {
                   </Text>
                 </View>
               )}
-              {detail?.status === "onsale" && (
+              {place.status === "onsale" && (
                 <View className="rounded-full bg-green-500 px-3 py-1">
                   <Text className="text-xs font-semibold text-white">
                     {t("detail.onSale")}
                   </Text>
                 </View>
               )}
-              {detail?.status === "cancelled" && (
+              {place.status === "cancelled" && (
                 <View className="rounded-full bg-red-500 px-3 py-1">
                   <Text className="text-xs font-semibold text-white">
                     {t("detail.cancelled")}
@@ -242,30 +245,30 @@ export default function LocationDetailScreen() {
               {venueLine ? (
                 <InfoRow icon="location-outline" text={venueLine} muted={muted} />
               ) : null}
-              {detail?.subGenre ? (
+              {place.subGenre ? (
                 <InfoRow
                   icon="musical-notes-outline"
-                  text={`${place.category} · ${detail.subGenre}`}
+                  text={`${place.category} · ${place.subGenre}`}
                   muted={muted}
                 />
               ) : null}
-              {detail?.onSaleText ? (
+              {place.onSaleText ? (
                 <InfoRow
                   icon="pricetag-outline"
-                  text={t("detail.onSaleOn", { date: detail.onSaleText })}
+                  text={t("detail.onSaleOn", { date: place.onSaleText })}
                   muted={muted}
                 />
               ) : null}
             </View>
 
             {/* Artist + links */}
-            {detail?.artist && detail.artist.links.length > 0 && (
+            {place.artist && place.artist.links.length > 0 && (
               <View className="mt-6">
                 <Text className="mb-3 text-lg font-bold text-neutral-900 dark:text-white">
-                  {detail.artist.name}
+                  {place.artist.name}
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
-                  {detail.artist.links
+                  {place.artist.links
                     .filter((l) => LINK_META[l.type])
                     .map((l) => (
                       <Pressable
@@ -288,14 +291,14 @@ export default function LocationDetailScreen() {
             )}
 
             {/* Image gallery */}
-            {detail?.images && detail.images.length > 1 && (
+            {place.images.length > 1 && (
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 className="mt-6"
                 contentContainerStyle={{ gap: 10 }}
               >
-                {detail.images.map((p) => (
+                {place.images.map((p) => (
                   <Image
                     key={p}
                     source={p}
@@ -320,13 +323,13 @@ export default function LocationDetailScreen() {
             ) : null}
 
             {/* Good to know */}
-            {detail?.pleaseNote ? (
+            {place.pleaseNote ? (
               <View className="mt-6">
                 <Text className="mb-2 text-lg font-bold text-neutral-900 dark:text-white">
                   {t("detail.goodToKnow")}
                 </Text>
                 <Text className="text-[15px] leading-6 text-neutral-600 dark:text-neutral-300">
-                  {detail.pleaseNote}
+                  {place.pleaseNote}
                 </Text>
               </View>
             ) : null}

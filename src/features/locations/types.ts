@@ -3,8 +3,17 @@
  * Cloudflare Worker (`/api/places`), not Ticketmaster's raw response. The Worker
  * owns the provider mapping, so the app is fully decoupled from the data source.
  *
- * A "Location" here is a live event pinned at its venue.
+ * A "Location" here is a live event pinned at its venue. The list endpoint
+ * returns these FULLY populated (the Ticketmaster search response already
+ * includes the rich fields), so the detail screen renders everything instantly
+ * from cache with no second request.
  */
+export interface ArtistLink {
+  /** e.g. "spotify" | "youtube" | "instagram" | "wiki" | "homepage" | "itunes" */
+  type: string;
+  url: string;
+}
+
 export interface Location {
   id: string;
   name: string;
@@ -25,16 +34,8 @@ export interface Location {
   /** Ticket purchase link (Ticketmaster). */
   url: string | null;
   description: string;
-}
 
-export interface ArtistLink {
-  /** e.g. "spotify" | "youtube" | "instagram" | "wiki" | "homepage" | "itunes" */
-  type: string;
-  url: string;
-}
-
-/** Richer payload from `/api/places/:id`. */
-export interface LocationDetail extends Location {
+  // --- richer fields (also present on the list, so the detail screen is instant) ---
   /** Distinct images (event + artist), already de-duped by the Worker. */
   images: string[];
   /** Ticket status, e.g. "onsale" | "offsale" | "cancelled". */
@@ -45,3 +46,6 @@ export interface LocationDetail extends Location {
   pleaseNote: string | null;
   artist: { name: string; links: ArtistLink[] } | null;
 }
+
+/** Kept as an alias — the list and detail endpoints now return the same shape. */
+export type LocationDetail = Location;
