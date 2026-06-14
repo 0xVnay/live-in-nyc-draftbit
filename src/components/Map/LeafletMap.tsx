@@ -29,13 +29,17 @@ function makePinIcon(selected: boolean) {
   });
 }
 
-/** Pans/zooms the map whenever the active location changes (carousel <-> map sync). */
-function FlyToActive({ lat, lng }: { lat: number; lng: number }) {
+/** Keeps the active venue centered as the carousel scrolls. Pans smoothly (which
+ *  keeps the selected pin in frame); only does a one-off zoom-in if the user is
+ *  zoomed out past minFocusZoom — so fast scrolling doesn't re-zoom every tick. */
+function FollowActive({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   useEffect(() => {
-    // Pan to the venue; only zoom IN if the user is zoomed out past minFocusZoom.
-    const target = Math.max(map.getZoom(), CITY.minFocusZoom);
-    map.flyTo([lat, lng], target, { duration: 0.6 });
+    if (map.getZoom() < CITY.minFocusZoom) {
+      map.flyTo([lat, lng], CITY.minFocusZoom, { duration: 0.5 });
+    } else {
+      map.panTo([lat, lng], { animate: true, duration: 0.4 });
+    }
   }, [lat, lng, map]);
   return null;
 }
@@ -56,10 +60,9 @@ export default function LeafletMap({
     ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
     : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 
-  // Icons are created once and never change — the idle pins never re-render,
-  // and a single "selected" marker simply MOVES to the active venue. This avoids
-  // remounting/icon-swapping markers (which flickered + dropped the blue pin
-  // while scrolling).
+  // Icons are created ONCE (stable refs). Each marker keeps a stable key, so
+  // react-leaflet never remounts them — it just calls setIcon() in place on the
+  // two markers whose selected state changed. No overlay, no remount, no flicker.
   const idleIcon = useMemo(() => makePinIcon(false), []);
   const selectedIcon = useMemo(() => makePinIcon(true), []);
 
@@ -74,24 +77,19 @@ export default function LeafletMap({
         url={tile}
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
       />
-      {locations.map((loc, index) => (
-        <Marker
-          key={loc.id}
-          position={[loc.latitude, loc.longitude]}
-          icon={idleIcon}
-          eventHandlers={{ click: () => onMarkerPress(index) }}
-        />
-      ))}
-      {active && (
-        <Marker
-          key="__selected__"
-          position={[active.latitude, active.longitude]}
-          icon={selectedIcon}
-          zIndexOffset={1000}
-          interactive={false}
-        />
-      )}
-      {active && <FlyToActive lat={active.latitude} lng={active.longitude} />}
+      {locations.map((loc, index) => {
+        const selected = index === activeIndex;
+        return (
+          <Marker
+            key={loc.id}
+            position={[loc.latitude, loc.longitude]}
+            icon={selected ? selectedIcon : idleIcon}
+            zIndexOffset={selected ? 1000 : 0}
+            eventHandlers={{ click: () => onMarkerPress(index) }}
+          />
+        );
+      })}
+      {active && <FollowActive lat={active.latitude} lng={active.longitude} />}
     </MapContainer>
   );
 }
