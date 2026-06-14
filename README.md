@@ -1,50 +1,80 @@
-# Welcome to your Expo app 👋
+# Live in NYC — a cross-platform map app
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A two-screen, cross-platform (iOS / Android / Web) app that plots **live events
+in New York City** on a map and lets you explore them. Built with Expo SDK 54 and
+deployed as a single public Cloudflare Worker.
 
-## Get started
+**Live demo:** _<add deployed Worker URL>_
 
-1. Install dependencies
+## Screens
 
-   ```bash
-   npm install
-   ```
+1. **Map** — event venues as pins, with a horizontal card carousel. Tap a pin and
+   the carousel snaps to that card; swipe the carousel and the map pans to the pin
+   (two-way sync). The focused pin is highlighted.
+2. **Detail** — the card image morphs into a full-screen hero (shared-element
+   style transition) with a parallax header, showing date/time, venue, price,
+   genre, the artist with links (Spotify, YouTube, Wikipedia, …), and a "Get
+   Tickets" deep link.
 
-2. Start the app
+## Architecture
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+Client (Expo: native + web)
+        │   fetches a stable, normalized shape
+        ▼
+Cloudflare Worker  ──►  Ticketmaster Discovery API
+  • hides the API key (server-side secret)
+  • normalizes the response → the app is provider-agnostic
+  • caches normalized payloads in KV (cheap + resilient)
+  • also serves the static web build (one public URL = app + API)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+The Worker is a **backend-for-frontend**: the app talks only to `/api/places`,
+never to Ticketmaster, so the data provider can be swapped without touching the
+app (which happened several times during the build).
 
-## Learn more
+The map is **platform-split** — `react-native-maps` on native, `react-leaflet`
+(free OSM/CARTO tiles, no token) on web — behind one shared `Map` interface, so
+the web build never bundles native-only modules.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Tech stack
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- **Expo SDK 54** + **Expo Router** (file-based, native + web)
+- **TypeScript** (strict)
+- **TanStack Query** (server state, caching, loading/error states)
+- **NativeWind v4** (Tailwind styling, dark mode)
+- **Reanimated 4** + **Gesture Handler** (carousel scale, parallax, hero morph)
+- **react-native-maps** (native) / **react-leaflet** (web)
+- **Zustand** (small UI store: theme + transition state)
+- **i18next** (strings scaffolded for localization; English shipped)
+- **Cloudflare Workers** + **KV** (BFF proxy, cache, static hosting)
 
-## Join the community
+## Project structure
 
-Join our community of developers creating universal apps.
+```
+app/                     # Expo Router routes (Map + Detail)
+src/
+  features/locations/    # data layer + location components (provider-agnostic)
+  components/Map/         # platform-split map (Map.native / Map.web + Leaflet)
+  components/ui/          # shared UI
+  lib/ store/ theme/ i18n/
+worker/                  # Cloudflare Worker (Ticketmaster BFF + static assets)
+docs/SETUP.md            # run + deploy instructions
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Running it
+
+See **[docs/SETUP.md](docs/SETUP.md)** for full local-run and deploy steps.
+
+Quick start:
+
+```bash
+npm install
+# Worker (Ticketmaster key in worker/.dev.vars):
+cd worker && npm install && npm run dev
+# App:
+cd .. && npx expo start
+```
+
+> `react-native-maps` is a native module and does **not** run in Expo Go — use the
+> web build or a dev build (`npx expo run:ios --device`).
