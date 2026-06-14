@@ -4,7 +4,7 @@ A two-screen, cross-platform (iOS / Android / Web) app that plots **live events
 in New York City** on a map and lets you explore them. Built with Expo SDK 54 and
 deployed as a single public Cloudflare Worker.
 
-**Live demo:** _<add deployed Worker URL>_
+**Live demo:** https://draftbit-map.vinayleokumar.workers.dev
 
 ## Screens
 

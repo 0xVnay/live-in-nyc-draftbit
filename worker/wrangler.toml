@@ -14,7 +14,7 @@ not_found_handling = "single-page-application"
 # Create with:  npx wrangler kv namespace create CACHE   then paste the id below.
 [[kv_namespaces]]
 binding = "CACHE"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "f007da03acc742beb4b8dd5b9c48f71b"
 
 [vars]
 # Which events to show. Ticketmaster's coverage is strongest in the US/UK.
