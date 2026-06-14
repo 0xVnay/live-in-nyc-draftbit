@@ -1,0 +1,27 @@
+name = "draftbit-map"
+main = "src/index.ts"
+compatibility_date = "2025-06-01"
+
+# Serve the Expo web export (../dist) as static assets. Any request that isn't
+# an /api/* route falls through to these files (SPA fallback to index.html).
+[assets]
+directory = "../dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# KV cache for normalized Ticketmaster responses — keeps the demo fast and well
+# under the 5k/day quota; serves the last good payload if the upstream errors.
+# Create with:  npx wrangler kv namespace create CACHE   then paste the id below.
+[[kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+# Which events to show. Ticketmaster's coverage is strongest in the US/UK.
+SEARCH_CITY = "New York"
+SEARCH_CLASSIFICATION = "music"
+SEARCH_SIZE = "60"
+CACHE_TTL_SECONDS = "21600"
+
+# TICKETMASTER_API_KEY is a secret, NOT stored here. Set it with:
+#   npx wrangler secret put TICKETMASTER_API_KEY

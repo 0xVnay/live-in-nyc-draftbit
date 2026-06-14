@@ -1,0 +1,4 @@
+# Local-dev secret for `wrangler dev`. Copy to `.dev.vars` and fill in.
+# In production this is set via: npx wrangler secret put TICKETMASTER_API_KEY
+# (Use the Ticketmaster "Consumer Key" — the Discovery API uses it as `apikey`.)
+TICKETMASTER_API_KEY=your-ticketmaster-consumer-key
