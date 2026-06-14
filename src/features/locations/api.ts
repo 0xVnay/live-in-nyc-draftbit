@@ -7,8 +7,14 @@ import type { Location, LocationDetail } from "./types";
  * The Worker hides the API key, normalizes the response, and caches it.
  */
 
-export function fetchLocations(signal?: AbortSignal): Promise<Location[]> {
-  return getJson<Location[]>(`${API_BASE_URL}/api/places`, signal);
+export function fetchLocations(
+  signal?: AbortSignal,
+  force = false,
+): Promise<Location[]> {
+  // `force` adds ?refresh=1 so the Worker bypasses its KV cache and re-fetches
+  // upstream — used by the app's manual refresh.
+  const url = `${API_BASE_URL}/api/places${force ? "?refresh=1" : ""}`;
+  return getJson<Location[]>(url, signal);
 }
 
 export function fetchLocation(

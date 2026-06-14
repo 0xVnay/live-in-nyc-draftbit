@@ -5,6 +5,7 @@ import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Map } from "@/src/components/Map/Map";
+import { RefreshButton } from "@/src/components/ui/RefreshButton";
 import { StateView } from "@/src/components/ui/StateView";
 import { ThemeToggle } from "@/src/components/ui/ThemeToggle";
 import { LocationCarousel, type CarouselHandle } from "@/src/features/locations/components/LocationCarousel";
@@ -91,7 +92,10 @@ export default function MapScreen() {
             {t("map.subtitle", { count: locations.length })}
           </Text>
         </View>
-        <ThemeToggle />
+        <View className="gap-2">
+          <ThemeToggle />
+          <RefreshButton />
+        </View>
       </View>
 
       {/* Carousel overlay */}
