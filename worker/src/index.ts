@@ -35,7 +35,7 @@ interface Env {
 const STALE_RETENTION_SECONDS = 60 * 24 * 60 * 60; // keep stale 60 days
 const TM_BASE = "https://app.ticketmaster.com/discovery/v2";
 // Bump when the normalized shape changes, to invalidate old cached payloads.
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 
 // --- CORS ---------------------------------------------------------------------
 const CORS_HEADERS: Record<string, string> = {
@@ -56,10 +56,13 @@ async function cached<T>(
   key: string,
   ttlSeconds: number,
   produce: () => Promise<T>,
+  force = false,
 ): Promise<T> {
   const entry = await env.CACHE.get(key, "json");
   const now = Date.now();
-  if (entry && now - entry.ts < ttlSeconds * 1000) return entry.data as T;
+  // `force` (a manual refresh from the app) skips the freshness check and
+  // re-fetches upstream, but still falls back to the stale entry on error.
+  if (!force && entry && now - entry.ts < ttlSeconds * 1000) return entry.data as T;
   try {
     const data = await produce();
     await env.CACHE.put(key, JSON.stringify({ data, ts: now }), {
@@ -236,7 +239,7 @@ async function tmFetch<T>(env: Env, path: string, params: Record<string, string>
 }
 
 // --- Route handlers -----------------------------------------------------------
-async function handlePlaces(env: Env): Promise<Response> {
+async function handlePlaces(env: Env, force: boolean): Promise<Response> {
   const ttl = Number(env.CACHE_TTL_SECONDS) || 21600;
   const data = await cached(env, `${CACHE_VERSION}:places:list`, ttl, async () => {
     const res = await tmFetch<{ _embedded?: { events?: TMEvent[] } }>(env, "/events.json", {
@@ -248,7 +251,9 @@ async function handlePlaces(env: Env): Promise<Response> {
     const events = res._embedded?.events ?? [];
     const seen = new Set<string>();
     return events
-      .map(normalizeBase)
+      // Fully normalize (incl. artist/status/gallery) so the app's detail screen
+      // is instant from cache — the search response already carries these fields.
+      .map(normalizeDetail)
       // need coords for a pin + an image for the card
       .filter((e) => Number.isFinite(e.latitude) && Number.isFinite(e.longitude) && e.imageUrl)
       // de-dupe near-identical listings by name
@@ -257,7 +262,7 @@ async function handlePlaces(env: Env): Promise<Response> {
         return seen.has(k) ? false : (seen.add(k), true);
       })
       .slice(0, 20);
-  });
+  }, force);
   return json(data);
 }
 
@@ -280,7 +285,9 @@ export default {
       return new Response(null, { headers: CORS_HEADERS });
     }
     if (url.pathname.startsWith("/api/")) {
-      if (url.pathname === "/api/places") return handlePlaces(env);
+      if (url.pathname === "/api/places") {
+        return handlePlaces(env, url.searchParams.get("refresh") === "1");
+      }
       const match = url.pathname.match(/^\/api\/places\/(.+)$/);
       if (match) return handlePlaceDetail(env, decodeURIComponent(match[1]));
       return json({ error: "Unknown endpoint" }, 404);
