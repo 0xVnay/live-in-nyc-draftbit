@@ -74,9 +74,13 @@ export const LocationCarousel = forwardRef<CarouselHandle, Props>(
   function LocationCarousel({ locations, onActiveIndexChange, onCardPress }, ref) {
     const listRef = useRef<FlatList<Location>>(null);
     const scrollX = useSharedValue(0);
+    // -1 when idle; otherwise the index a tap-driven scroll is gliding toward.
+    const programmaticTarget = useSharedValue(-1);
 
     useImperativeHandle(ref, () => ({
       scrollToIndex: (index: number) => {
+        const current = Math.round(scrollX.value / ITEM_SIZE);
+        if (index !== current) programmaticTarget.value = index;
         listRef.current?.scrollToOffset({
           offset: index * ITEM_SIZE,
           animated: true,
@@ -104,9 +108,14 @@ export const LocationCarousel = forwardRef<CarouselHandle, Props>(
     useAnimatedReaction(
       () => Math.round(scrollX.value / ITEM_SIZE),
       (curr, prev) => {
-        if (curr !== prev && curr >= 0 && curr < locations.length) {
-          runOnJS(notify)(curr);
+        if (curr === prev || curr < 0 || curr >= locations.length) return;
+        // While a tap-driven scroll glides to a far card, don't ripple the map
+        // through every intermediate pin — resume only once it reaches the target.
+        if (programmaticTarget.value !== -1) {
+          if (curr === programmaticTarget.value) programmaticTarget.value = -1;
+          return;
         }
+        runOnJS(notify)(curr);
       },
       [locations.length],
     );
@@ -123,6 +132,10 @@ export const LocationCarousel = forwardRef<CarouselHandle, Props>(
         disableIntervalMomentum
         onScroll={onScroll}
         scrollEventThrottle={16}
+        onScrollBeginDrag={() => {
+          // User grabbed the carousel — stop suppressing map updates.
+          programmaticTarget.value = -1;
+        }}
         contentContainerStyle={{ paddingHorizontal: SIDE_INSET }}
         renderItem={({ item, index }) => (
           <CarouselItem index={index} scrollX={scrollX}>
