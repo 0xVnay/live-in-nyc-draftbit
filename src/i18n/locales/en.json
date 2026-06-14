@@ -1,0 +1,24 @@
+{
+  "map": {
+    "title": "Live in NYC",
+    "subtitle": "{{count}} upcoming shows",
+    "loading": "Finding live shows…",
+    "error": "Couldn't load events.",
+    "retry": "Try again",
+    "empty": "No events to show."
+  },
+  "detail": {
+    "getTickets": "Get Tickets",
+    "directions": "Directions",
+    "about": "About",
+    "goodToKnow": "Good to know",
+    "onSale": "On sale",
+    "cancelled": "Cancelled",
+    "onSaleOn": "On sale {{date}}"
+  },
+  "theme": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  }
+}

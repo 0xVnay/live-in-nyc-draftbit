@@ -31,7 +31,13 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
+
+# Cloudflare / Wrangler
+.wrangler/
+.dev.vars
+worker/node_modules/
 
 # typescript
 *.tsbuildinfo
@@ -41,3 +47,8 @@ app-example
 # generated native folders
 /ios
 /android
+
+# internal / personal docs (kept out of the public repo)
+/PLAN.md
+/docs/BRIEF.md
+/docs/samples/
