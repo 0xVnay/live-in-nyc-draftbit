@@ -1,7 +1,7 @@
 import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 
 import { CITY } from "@/src/features/locations/config";
@@ -12,9 +12,11 @@ import type { MapProps } from "./types";
  *  broken default-marker-asset issue in bundlers). The selected pin is larger
  *  and brand-colored; the tip (iconAnchor) marks the exact spot. */
 function makePinIcon(selected: boolean) {
-  const w = selected ? 34 : 24;
-  const h = selected ? 44 : 31;
-  const fill = selected ? palette.brand : "#475569";
+  // Idle pins are red (visible on light + dark tiles); the selected pin is blue
+  // and a bit larger so it clearly stands out.
+  const w = selected ? 38 : 24;
+  const h = selected ? 48 : 31;
+  const fill = selected ? palette.brand : "#ef4444";
   const svg = `<svg width="${w}" height="${h}" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 0C5.37 0 0 5.37 0 12c0 8.5 12 20 12 20s12-11.5 12-20C24 5.37 18.63 0 12 0z" fill="${fill}" stroke="#ffffff" stroke-width="1.5"/>
     <circle cx="12" cy="12" r="4.4" fill="#ffffff"/>
@@ -54,6 +56,13 @@ export default function LeafletMap({
     ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
     : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 
+  // Icons are created once and never change — the idle pins never re-render,
+  // and a single "selected" marker simply MOVES to the active venue. This avoids
+  // remounting/icon-swapping markers (which flickered + dropped the blue pin
+  // while scrolling).
+  const idleIcon = useMemo(() => makePinIcon(false), []);
+  const selectedIcon = useMemo(() => makePinIcon(true), []);
+
   return (
     <MapContainer
       center={center}
@@ -65,21 +74,23 @@ export default function LeafletMap({
         url={tile}
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
       />
-      {locations.map((loc, index) => {
-        const selected = index === activeIndex;
-        return (
-          <Marker
-            // Keying on `selected` forces react-leaflet to swap the icon
-            // reliably when selection changes (the source of the "blue pin
-            // doesn't update" bug).
-            key={`${loc.id}-${selected}`}
-            position={[loc.latitude, loc.longitude]}
-            icon={makePinIcon(selected)}
-            zIndexOffset={selected ? 1000 : 0}
-            eventHandlers={{ click: () => onMarkerPress(index) }}
-          />
-        );
-      })}
+      {locations.map((loc, index) => (
+        <Marker
+          key={loc.id}
+          position={[loc.latitude, loc.longitude]}
+          icon={idleIcon}
+          eventHandlers={{ click: () => onMarkerPress(index) }}
+        />
+      ))}
+      {active && (
+        <Marker
+          key="__selected__"
+          position={[active.latitude, active.longitude]}
+          icon={selectedIcon}
+          zIndexOffset={1000}
+          interactive={false}
+        />
+      )}
       {active && <FlyToActive lat={active.latitude} lng={active.longitude} />}
     </MapContainer>
   );

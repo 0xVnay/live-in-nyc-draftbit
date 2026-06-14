@@ -13,8 +13,8 @@ export function MarkerPin({ selected }: { selected: boolean }) {
     <View style={{ alignItems: "center", justifyContent: "center" }}>
       <Ionicons
         name="location"
-        size={selected ? 46 : 32}
-        color={selected ? palette.brand : "#475569"}
+        size={selected ? 50 : 32}
+        color={selected ? palette.brand : "#ef4444"}
         style={{
           textShadowColor: "rgba(0,0,0,0.35)",
           textShadowOffset: { width: 0, height: 1 },
