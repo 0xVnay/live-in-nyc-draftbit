@@ -51,4 +51,5 @@ app-example
 # internal / personal docs (kept out of the public repo)
 /PLAN.md
 /docs/BRIEF.md
+/docs/HANDOFF.md
 /docs/samples/
