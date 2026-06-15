@@ -1,8 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Appearance } from "react-native";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-export type ThemeMode = "system" | "light" | "dark";
+export type ThemeMode = "light" | "dark";
+
+/** First launch follows the OS once; after that it's whatever the user picks. */
+const initialMode: ThemeMode =
+  Appearance.getColorScheme() === "dark" ? "dark" : "light";
 
 /** The on-screen rectangle + image of the tapped card, handed to the detail
  *  screen to drive the shared-element ("hero") morph. */
@@ -27,7 +32,7 @@ interface UIState {
 export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
-      themeMode: "system",
+      themeMode: initialMode,
       setThemeMode: (themeMode) => set({ themeMode }),
 
       transitionSource: null,

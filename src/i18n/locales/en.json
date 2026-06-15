@@ -18,10 +18,5 @@
     "loading": "Loading event…",
     "notFound": "We couldn't find that event.",
     "back": "Go back"
-  },
-  "theme": {
-    "system": "System",
-    "light": "Light",
-    "dark": "Dark"
   }
 }
