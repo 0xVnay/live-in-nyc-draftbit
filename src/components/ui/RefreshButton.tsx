@@ -1,11 +1,12 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ActivityIndicator, Pressable } from "react-native";
+import { ActivityIndicator } from "react-native";
 
 import { fetchLocations } from "@/src/features/locations/api";
 import { locationKeys } from "@/src/features/locations/queries";
 import { useAppTheme } from "@/src/theme/useAppTheme";
+import { IconButton } from "./IconButton";
 
 /**
  * Force-refresh: re-fetches with `force` (so the Worker bypasses its KV cache and
@@ -31,24 +32,12 @@ export function RefreshButton() {
   };
 
   return (
-    <Pressable
-      onPress={onRefresh}
-      hitSlop={8}
-      accessibilityLabel="Refresh events"
-      className="h-11 w-11 items-center justify-center rounded-full bg-white/85 dark:bg-neutral-800/85"
-      style={{
-        shadowColor: "#000",
-        shadowOpacity: 0.15,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 3,
-      }}
-    >
+    <IconButton onPress={onRefresh} accessibilityLabel="Refresh events">
       {refreshing ? (
         <ActivityIndicator size="small" color={colors.text} />
       ) : (
         <Ionicons name="refresh" size={20} color={colors.text} />
       )}
-    </Pressable>
+    </IconButton>
   );
 }
