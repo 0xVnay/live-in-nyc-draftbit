@@ -8,13 +8,11 @@ import type { Location } from "@/src/features/locations/types";
 import type { MapProps } from "./types";
 
 /**
- * A single marker whose view is captured once and then frozen.
- *
- * react-native-maps re-rasterizes a custom marker's view whenever
- * `tracksViewChanges` is true — and that re-rasterization is what makes markers
- * flicker/vanish on iOS while updating. We track changes only briefly (long
- * enough to capture the pin image) and then turn it off, so the marker never
- * re-renders natively again. Its view never changes — only its coordinate moves.
+ * A marker whose view is captured once, then frozen. react-native-maps
+ * re-rasterizes a custom marker's view while `tracksViewChanges` is true, and
+ * that's what makes pins flicker/vanish on iOS. We track changes only briefly
+ * (long enough to capture the image), then turn it off — the view never changes
+ * again, only its coordinate moves.
  */
 function PinMarker({
   coordinate,
@@ -46,11 +44,9 @@ function PinMarker({
 
 /**
  * Native map (iOS: Apple Maps, Android: Google Maps) via react-native-maps.
- *
- * Two-way sync: tapping a pin or scrolling the carousel changes `activeIndex`,
- * which (a) moves the camera here and (b) moves the single blue "selected"
- * marker. The red idle pins are rendered ONCE and never change, so they never
- * re-rasterize (the source of the vanishing-pin bug on iOS).
+ * Two-way sync via `activeIndex`: it moves the camera and the single blue
+ * "selected" marker. The red idle pins render ONCE and never change, so they
+ * never re-rasterize (the vanishing-pin bug on iOS).
  */
 export function Map({ locations, activeIndex, onMarkerPress }: MapProps) {
   const mapRef = useRef<MapView>(null);

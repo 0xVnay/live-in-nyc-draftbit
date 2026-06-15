@@ -5,13 +5,9 @@ import { useUIStore } from "@/src/store/useUIStore";
 import { colorsFor, type ColorScheme } from "./tokens";
 
 /**
- * Bridges our persisted theme preference (system/light/dark) with NativeWind.
- *
- * - NativeWind owns the actual `dark:` class state.
- * - When the user picks "system" we let NativeWind follow the OS.
- * - When they pick light/dark we force it.
- *
- * Returns the effective scheme + raw color tokens for imperative styling.
+ * Bridges our persisted theme preference (system/light/dark) with NativeWind,
+ * which owns the actual `dark:` state: "system" follows the OS, light/dark force
+ * it. Returns the effective scheme + raw color tokens for imperative styling.
  */
 export function useAppTheme() {
   const themeMode = useUIStore((s) => s.themeMode);
