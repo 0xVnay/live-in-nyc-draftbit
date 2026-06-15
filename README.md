@@ -15,7 +15,11 @@ the web app and its API.
 
 ## Demo
 
-A short screen recording of the app in action:
+A short screen recording of the app in action: 
+
+https://github.com/user-attachments/assets/29245d72-25b5-4ee7-95d5-991bc4dcac70
+
+
 
 ## Screens
 
