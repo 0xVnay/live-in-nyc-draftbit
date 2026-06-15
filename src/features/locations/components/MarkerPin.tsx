@@ -11,7 +11,7 @@ import { palette } from "@/src/theme/tokens";
  */
 export function MarkerPin({ selected }: { selected: boolean }) {
   const size = selected ? 50 : 32;
-  const color = selected ? palette.brand : "#ef4444";
+  const color = selected ? palette.brand : palette.markerPin;
   const dot = size * 0.3;
 
   return (

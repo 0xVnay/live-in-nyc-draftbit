@@ -16,7 +16,7 @@ function makePinIcon(selected: boolean) {
   // and a bit larger so it clearly stands out.
   const w = selected ? 38 : 24;
   const h = selected ? 48 : 31;
-  const fill = selected ? palette.brand : "#ef4444";
+  const fill = selected ? palette.brand : palette.markerPin;
   const svg = `<svg width="${w}" height="${h}" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 0C5.37 0 0 5.37 0 12c0 8.5 12 20 12 20s12-11.5 12-20C24 5.37 18.63 0 12 0z" fill="${fill}" stroke="#ffffff" stroke-width="1.5"/>
     <circle cx="12" cy="12" r="4.4" fill="#ffffff"/>
@@ -71,7 +71,10 @@ export default function LeafletMap({
       center={center}
       zoom={CITY.initialZoom}
       zoomControl={false}
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+      // zIndex:0 makes the map its own stacking context so Leaflet's internal
+      // panes (z-index 400+) stay trapped inside it instead of painting over the
+      // app's absolutely-positioned overlays (header, carousel) that sit on top.
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 0 }}
     >
       <TileLayer
         url={tile}

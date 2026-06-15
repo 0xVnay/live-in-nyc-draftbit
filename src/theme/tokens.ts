@@ -8,6 +8,9 @@
 export const palette = {
   brand: "#2563eb",
   brandLight: "#3b82f6",
+  /** Default (unselected) map pin — red, visible on both light and dark tiles.
+   *  The selected pin uses `brand`. */
+  markerPin: "#ef4444",
   light: {
     background: "#ffffff",
     card: "#ffffff",
