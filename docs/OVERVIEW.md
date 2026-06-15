@@ -6,8 +6,7 @@ problems solved along the way.
 
 - **Live:** https://draftbit-map.vinayleokumar.workers.dev
 - **Run / deploy:** see the [README](../README.md)
-
-<video src="https://github.com/0xVnay/live-in-nyc-draftbit/raw/main/docs/demo.mp4" controls></video>
+- **Demo:** a screen recording is in the [README](../README.md#demo)
 
 ## Contents
 

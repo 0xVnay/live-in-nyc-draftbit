@@ -15,7 +15,7 @@ the web app and its API.
 
 ## Demo
 
-<video src="https://github.com/0xVnay/live-in-nyc-draftbit/raw/main/docs/demo.mp4" controls></video>
+A short screen recording of the app in action:
 
 ## Screens
 
