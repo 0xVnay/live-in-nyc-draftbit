@@ -13,6 +13,11 @@ export interface CardPressPayload {
   rect: { x: number; y: number; width: number; height: number };
 }
 
+/**
+ * Carousel card — the "Spotlight" look: a full-bleed event photo with a strong
+ * bottom scrim. The category chip and price pill float at the top; the title,
+ * venue and date sit at the bottom.
+ */
 export function LocationCard({
   location,
   onPress,
@@ -21,6 +26,7 @@ export function LocationCard({
   onPress: (payload: CardPressPayload) => void;
 }) {
   const ref = useRef<View>(null);
+  const when = [location.dateText, location.timeText].filter(Boolean).join(" · ");
 
   const handlePress = () => {
     // Measure where this card is on screen, so the detail hero can animate
@@ -55,33 +61,41 @@ export function LocationCard({
 
         {/* Scrim so the text stays legible over any photo. */}
         <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.15)", "rgba(0,0,0,0.8)"]}
-          locations={[0, 0.5, 1]}
-          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: "78%" }}
+          colors={["rgba(0,0,0,0.45)", "transparent", "rgba(0,0,0,0.85)"]}
+          locations={[0, 0.45, 1]}
+          style={{ position: "absolute", inset: 0 }}
         />
 
-        <View className="absolute inset-x-0 bottom-0 p-4">
-          <View className="mb-1.5 flex-row items-center gap-2">
-            <View className="self-start rounded-full bg-white/25 px-2.5 py-0.5">
-              <Text className="text-[11px] font-semibold uppercase tracking-wide text-white">
-                {location.category}
+        {/* Top row: category + price */}
+        <View className="absolute inset-x-0 top-0 flex-row items-center justify-between p-3.5">
+          <View className="rounded-full bg-white/20 px-2.5 py-1">
+            <Text className="text-[11px] font-semibold uppercase tracking-wide text-white">
+              {location.category}
+            </Text>
+          </View>
+          {location.priceText && (
+            <View className="rounded-full bg-white/90 px-2.5 py-1">
+              <Text className="text-[11px] font-bold text-neutral-900">
+                {location.priceText}
               </Text>
             </View>
-            {location.dateText && (
-              <Text className="text-xs font-medium text-white/90">
-                {location.dateText}
-              </Text>
-            )}
-          </View>
-          <Text numberOfLines={1} className="text-lg font-bold text-white">
+          )}
+        </View>
+
+        {/* Bottom: title + venue + date */}
+        <View className="absolute inset-x-0 bottom-0 p-4">
+          <Text numberOfLines={1} className="text-xl font-extrabold text-white">
             {location.name}
           </Text>
-          <View className="flex-row items-center gap-1">
+          <View className="mt-0.5 flex-row items-center gap-1">
             <Ionicons name="location" size={12} color="rgba(255,255,255,0.85)" />
-            <Text numberOfLines={1} className="flex-1 text-sm text-white/80">
+            <Text numberOfLines={1} className="flex-1 text-sm text-white/85">
               {location.venue}
             </Text>
           </View>
+          {when ? (
+            <Text className="mt-0.5 text-xs font-medium text-white/70">{when}</Text>
+          ) : null}
         </View>
       </View>
     </Pressable>
