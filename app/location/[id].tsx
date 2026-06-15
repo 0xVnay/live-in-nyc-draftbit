@@ -30,6 +30,7 @@ import {
   useLocationFromList,
 } from "@/src/features/locations/queries";
 import { useUIStore } from "@/src/store/useUIStore";
+import { colorsFor } from "@/src/theme/tokens";
 import { useAppTheme } from "@/src/theme/useAppTheme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -75,9 +76,9 @@ export default function LocationDetailScreen() {
   // The list is fully populated, so `base` (from the list cache) already has
   // every field and renders instantly. `detail` is only a fallback for a cold
   // deep-link straight to this screen.
-  const { data: base } = useLocationFromList(id);
-  const { data: detail } = useLocationDetail(id);
-  const place = base ?? detail;
+  const fromList = useLocationFromList(id);
+  const detailQuery = useLocationDetail(id);
+  const place = fromList.data ?? detailQuery.data;
 
   const { isDark } = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -129,10 +130,23 @@ export default function LocationDetailScreen() {
   }));
 
   if (!place) {
-    return <StateView loading message="…" />;
+    // Still fetching — e.g. a cold deep-link straight to this screen with no
+    // list cache yet.
+    if (fromList.isLoading || detailQuery.isLoading) {
+      return <StateView loading message={t("detail.loading")} />;
+    }
+    // Both queries settled with nothing to show: a bad/expired id or a failed
+    // fetch. Give the user a way out instead of an endless spinner.
+    return (
+      <StateView
+        message={t("detail.notFound")}
+        actionLabel={t("detail.back")}
+        onAction={() => router.back()}
+      />
+    );
   }
 
-  const muted = isDark ? "#94a3b8" : "#64748b";
+  const muted = colorsFor(isDark ? "dark" : "light").muted;
   const when = [place.dateText, place.timeText].filter(Boolean).join(" · ");
   const venueLine = [place.venue, place.address, place.city]
     .filter(Boolean)

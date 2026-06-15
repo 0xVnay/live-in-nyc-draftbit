@@ -14,7 +14,10 @@
     "goodToKnow": "Good to know",
     "onSale": "On sale",
     "cancelled": "Cancelled",
-    "onSaleOn": "On sale {{date}}"
+    "onSaleOn": "On sale {{date}}",
+    "loading": "Loading event…",
+    "notFound": "We couldn't find that event.",
+    "back": "Go back"
   },
   "theme": {
     "system": "System",
