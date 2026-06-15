@@ -13,18 +13,9 @@ the web app and its API.
 > architecture decisions and trade-offs, the data-source journey, and the
 > complete log of problems hit and how each was solved. Start there for the "why."
 
-## Demos
+## Demo
 
-<!--
-To fill these in: on github.com, click this README's pencil (Edit) icon, drag the
-iOS and Android screen recordings into the editor, and GitHub will upload them and
-insert https://github.com/user-attachments/assets/... URLs. Drop each URL into the
-matching `src` below (or replace the cell with the bare URL), then commit.
--->
-
-| iOS | Android |
-| --- | --- |
-| <video src="IOS_VIDEO_URL" controls></video> | <video src="ANDROID_VIDEO_URL" controls></video> |
+<video src="https://github.com/0xVnay/live-in-nyc-draftbit/raw/main/docs/demo.mp4" controls></video>
 
 ## Screens
 
